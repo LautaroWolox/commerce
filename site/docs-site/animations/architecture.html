@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="es" data-theme="dark"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Animación</title><link rel="stylesheet" href="../css/styles.css"/><link rel="stylesheet" href="../css/animations.css"/>
+</head><body>
+<header class="site-header"><a class="brand" href="../README.html">E‑Commerce E2E</a>
+<nav class="main-nav"><a href="../animations.html">Volver</a></nav><button id="themeToggle" class="btn">🌓</button></header>
+<main id="content" class="content fade-in">
+<h1>Animación • Arquitectura</h1>
+<div class="anim-stage">
+<svg viewBox="0 0 1100 520" class="anim-svg" id="archSvg">
+  <g id="api" class="node"><rect x="60" y="80" width="160" height="60" rx="12" class="apigw"/><text x="140" y="115" text-anchor="middle">API GW</text></g>
+  <g id="bff" class="node"><rect x="300" y="80" width="160" height="60" rx="12" class="bff"/><text x="380" y="115" text-anchor="middle">BFF</text></g>
+  <g id="order" class="node"><rect x="540" y="60" width="160" height="60" rx="12" class="svc"/><text x="620" y="95" text-anchor="middle">Order</text></g>
+  <g id="payment" class="node"><rect x="540" y="150" width="160" height="60" rx="12" class="svc"/><text x="620" y="185" text-anchor="middle">Payment</text></g>
+  <g id="pg" class="node"><rect x="780" y="60" width="160" height="60" rx="12" class="db"/><text x="860" y="95" text-anchor="middle">PostgreSQL</text></g>
+  <g id="kafka" class="node"><rect x="780" y="150" width="160" height="60" rx="12" class="svc"/><text x="860" y="185" text-anchor="middle">Kafka</text></g>
+  <line id="a1" x1="220" y1="110" x2="300" y2="110" class="edge"/>
+  <line id="a2" x1="460" y1="110" x2="540" y2="90" class="edge"/>
+  <line id="a3" x1="460" y1="110" x2="540" y2="180" class="edge"/>
+  <line id="a4" x1="700" y1="90" x2="780" y2="90" class="edge"/>
+  <line id="a5" x1="700" y1="180" x2="780" y2="180" class="edge"/>
+  <circle id="pkt" cx="80" cy="110" r="8" class="particle token"/>
+</svg>
+<div class="anim-controls"><button class="btn" id="playA">▶</button><button class="btn" id="pauseA">⏸</button><button class="btn" id="resetA">⟲</button></div>
+</div>
+<script>
+(function(){
+ let i=0,t=null;const edges=['a1','a2','a3','a4','a5'];const steps=[{x:140,y:110},{x:380,y:110},{x:620,y:90},{x:860,y:90},{x:620,y:180},{x:860,y:180}];
+ function setEdges(){edges.forEach((e,idx)=>{document.getElementById(e).classList.toggle('active', idx < i);});}
+ function move(){const s=steps[Math.min(i,steps.length-1)];const p=document.getElementById('pkt');p.setAttribute('cx',s.x);p.setAttribute('cy',s.y);}
+ function render(){setEdges();move();}
+ function play(){ if(t) return; t=setInterval(()=>{i++; if(i>steps.length){pause();return;} render();},1000); }
+ function pause(){clearInterval(t);t=null;}
+ function reset(){pause();i=0;render();}
+ document.getElementById('playA').onclick=play;document.getElementById('pauseA').onclick=pause;document.getElementById('resetA').onclick=reset; reset();
+})();
+</script>
+</main><footer class="site-footer"><small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small></footer><script src="../js/main.js"></script>
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body></html>

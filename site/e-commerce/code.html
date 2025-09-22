@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Código • E‑commerce</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
+  <script>document.addEventListener('DOMContentLoaded',()=>{hljs.highlightAll();});</script>
+</head>
+<body>
+  <header class="site-header" role="banner" aria-label="Cabecera">
+    <a class="brand" href="README.html">E‑Commerce E2E</a>
+    <nav class="main-nav" role="navigation" aria-label="Navegación principal">
+      <a href="README.html">Índice</a>
+      <a href="architecture.html">Arquitectura</a>
+      <a href="checkout.html">Checkout</a>
+      <a href="kafka.html">Kafka</a>
+      <a href="openai.html">OpenAI</a>
+      <a href="deploy.html">Despliegue</a>
+      <a href="observability.html">Observabilidad</a>
+      <a href="databases.html">Datos</a>
+      <a href="code.html">Código</a>
+      <a href="deployments.html">Dev→Prod</a>
+      <a href="docs.html">Docs Técnicos</a>
+      <a href="diagrams.html">Diagramas</a>
+      <a href="animations.html">Animaciones</a>
+    </nav>
+    <button id="themeToggle" class="btn">🌓</button>
+  </header>
+
+  <main id="content" class="content fade-in">
+    <h1>Ejemplos de Código (Java&nbsp;21 + Spring&nbsp;Boot)</h1>
+    <p class="lead">Snippets listos para compilar con <strong>OAuth2/OIDC</strong>, <strong>Kafka</strong>, <strong>OpenTelemetry</strong>, manifiestos de <strong>OCP4 + Istio</strong> y pipeline de <strong>Tekton</strong>.</p>
+
+    <div class="code-grid">
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">build.gradle.kts</span>
+          <div class="actions">
+            <button class="btn-ghost copy">Copiar</button>
+            <button class="btn-ghost expand">Expandir</button>
+          </div>
+        </div>
+        <pre><code class="language-kotlin">plugins {
+  id("org.springframework.boot") version "3.3.2"
+  id("io.spring.dependency-management") version "1.1.5"
+  java
+}
+java { toolchain.languageVersion.set(JavaLanguageVersion.of(21)) }
+repositories { mavenCentral() }
+dependencies {
+  implementation("org.springframework.boot:spring-boot-starter-web")
+  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+  implementation("org.springframework.kafka:spring-kafka")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp:1.40.0")
+  implementation("io.opentelemetry:opentelemetry-sdk:1.40.0")
+  testImplementation("org.springframework.boot:spring-boot-starter-test")
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">application.yml</span>
+          <div class="actions">
+            <button class="btn-ghost copy">Copiar</button>
+            <button class="btn-ghost expand">Expandir</button>
+          </div>
+        </div>
+        <pre><code class="language-yaml">server:
+  port: 8080
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://auth.example.com/realms/commerce
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: orders-svc
+      auto-offset-reset: earliest
+    properties:
+      schema.registry.url: http://schema-registry:8081
+management:
+  endpoints.web.exposure.include: health,info,prometheus
+otel:
+  exporter.otlp.endpoint: http://dynatrace-otel-collector:4317
+  resource.attributes: service.name=order-service,service.version=1.0.0</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">SecurityConfig.java</span>
+          <div class="actions">
+            <button class="btn-ghost copy">Copiar</button>
+            <button class="btn-ghost expand">Expandir</button>
+          </div>
+        </div>
+        <pre><code class="language-java">package com.acme.orders.config;
+import org.springframework.context.annotation.*;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+@Configuration
+public class SecurityConfig {
+  @Bean
+  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(auth -> auth
+        .requestMatchers("/actuator/**").permitAll()
+        .anyRequest().authenticated())
+      .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+    return http.build();
+  }
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">KafkaConfig + Producer/Consumer</span>
+          <div class="actions">
+            <button class="btn-ghost copy">Copiar</button>
+            <button class="btn-ghost expand">Expandir</button>
+          </div>
+        </div>
+        <pre><code class="language-java">package com.acme.orders.messaging;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.context.annotation.*;
+import org.springframework.kafka.config.TopicBuilder;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.annotation.KafkaListener;
+@Configuration
+class KafkaConfig {
+  @Bean NewTopic ordersTopic() {
+    return TopicBuilder.name("orders.events").partitions(6).replicas(3).build();
+  }
+}
+@Component
+class OrderMessaging {
+  private final KafkaTemplate&lt;String,String&gt; kafka;
+  OrderMessaging(KafkaTemplate&lt;String,String&gt; kafka){ this.kafka = kafka; }
+  public void publishCreated(String orderId){ kafka.send("orders.events", orderId, "CREATED"); }
+  @KafkaListener(topics="orders.events", groupId="orders-svc")
+  public void onEvent(String message){ /* procesar */ }
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">OrderController (Tracing)</span>
+          <div class="actions">
+            <button class="btn-ghost copy">Copiar</button>
+            <button class="btn-ghost expand">Expandir</button>
+          </div>
+        </div>
+        <pre><code class="language-java">package com.acme.orders.api;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+@RestController @RequestMapping("/api/orders")
+public class OrderController {
+  private final Tracer tracer;
+  public OrderController(Tracer tracer){ this.tracer = tracer; }
+  @PostMapping
+  public ResponseEntity&lt;String&gt; create(@RequestBody String payload){
+    Span span = tracer.spanBuilder("createOrder").startSpan();
+    try { return ResponseEntity.ok("created"); }
+    finally { span.end(); }
+  }
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">OCP4 + Istio (Canary)</span>
+          <div class="actions">
+            <button class="btn-ghost copy">Copiar</button>
+            <button class="btn-ghost expand">Expandir</button>
+          </div>
+        </div>
+        <pre><code class="language-yaml">---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: order-svc-v1, labels: { app: order-svc, version: v1 } }
+spec:
+  replicas: 3
+  selector: { matchLabels: { app: order-svc, version: v1 } }
+  template:
+    metadata:
+      labels: { app: order-svc, version: v1 }
+      annotations: { sidecar.istio.io/inject: "true" }
+    spec:
+      containers:
+        - name: app
+          image: registry/commerce/order-svc:1.0.0
+          ports: [ { containerPort: 8080 } ]
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/otel/opentelemetry-javaagent.jar"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://dynatrace-otel-collector:4317"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: order-svc-v2, labels: { app: order-svc, version: v2 } }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: order-svc, version: v2 } }
+  template:
+    metadata:
+      labels: { app: order-svc, version: v2 }
+      annotations: { sidecar.istio.io/inject: "true" }
+    spec:
+      containers:
+        - name: app
+          image: registry/commerce/order-svc:1.1.0
+          ports: [ { containerPort: 8080 } ]
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata: { name: order-svc }
+spec:
+  host: order-svc
+  subsets:
+    - { name: v1, labels: { version: v1 } }
+    - { name: v2, labels: { version: v2 } }
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata: { name: order-svc }
+spec:
+  hosts: [ "order-svc" ]
+  http:
+    - route:
+        - { destination: { host: order-svc, subset: v1 }, weight: 90 }
+        - { destination: { host: order-svc, subset: v2 }, weight: 10 }</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">Tekton Pipeline (con gates)</span>
+          <div class="actions">
+            <button class="btn-ghost copy">Copiar</button>
+            <button class="btn-ghost expand">Expandir</button>
+          </div>
+        </div>
+        <pre><code class="language-yaml">---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata: { name: order-svc-ci }
+spec:
+  params:
+    - { name: sha, default: "latest" }
+  tasks:
+    - name: unit-tests
+      taskRef: { name: maven }
+      params: [ { name: GOALS, value: ["-B","test"] } ]
+    - name: sast-trivy
+      runAfter: [ "unit-tests" ]
+      taskSpec:
+        steps:
+          - name: scan
+            image: aquasec/trivy:latest
+            script: |
+              trivy fs --exit-code 1 --severity HIGH,CRITICAL .
+    - name: owasp-zap-dast
+      runAfter: [ "sast-trivy" ]
+      taskSpec:
+        steps:
+          - name: zap
+            image: ghcr.io/zaproxy/zaproxy:stable
+            script: |
+              zap-baseline.py -t http://order-svc:8080 -m 1 -I -r zap_report.html || true
+    - name: build-push
+      runAfter: [ "owasp-zap-dast" ]
+      taskRef: { name: buildah }
+      params: [ { name: IMAGE, value: registry/commerce/order-svc:$(params.sha) } ]
+    - name: deploy-canary
+      runAfter: [ "build-push" ]
+      taskSpec:
+        steps:
+          - name: kubectl
+            image: bitnami/kubectl:latest
+            script: |
+              kubectl apply -f k8s/istio-canary.yaml
+    - name: e2e-tests
+      runAfter: [ "deploy-canary" ]
+      taskSpec:
+        steps:
+          - name: k6
+            image: grafana/k6:latest
+            script: |
+              k6 run tests/e2e.js
+    - name: quality-gates
+      runAfter: [ "e2e-tests" ]
+      taskSpec:
+        steps:
+          - name: gate
+            image: alpine:3.19
+            script: |
+              echo "OK" # Chequear SLOs y decidir promoción</code></pre>
+      </section>
+
+    
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">application-oracle.yml</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-yaml">spring:
+  datasource:
+    url: jdbc:oracle:thin:@//oracle-host:1521/ORCLCDB
+    username: commerce
+    password: ${ORACLE_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.dialect: org.hibernate.dialect.OracleDialect
+</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">OrderEntity.java</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-java">package com.acme.orders;
+
+import jakarta.persistence.*;
+import java.time.Instant;
+
+@Entity @Table(name = "ORDERS")
+public class OrderEntity {
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+  private Long userId;
+  private String status;
+  private Double total;
+  private Instant createdAt = Instant.now();
+  // getters/setters ...
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">OrderRepository.java</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-java">package com.acme.orders;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+public interface OrderRepository extends JpaRepository<OrderEntity, Long> { }
+</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">checkout.bpmn</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-xml"><?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="https://acme.com/ecommerce/checkout">
+  <process id="checkout_process" name="Checkout" isExecutable="true">
+    <startEvent id="start" name="Start"/>
+    <sequenceFlow id="f1" sourceRef="start" targetRef="reserve_stock"/>
+    <serviceTask id="reserve_stock" name="Reserve Stock" camunda:class="com.acme.checkout.ReserveStockDelegate" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"/>
+    <sequenceFlow id="f2" sourceRef="reserve_stock" targetRef="authorize_payment"/>
+    <serviceTask id="authorize_payment" name="Authorize Payment" camunda:class="com.acme.checkout.AuthorizePaymentDelegate" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"/>
+    <sequenceFlow id="f3" sourceRef="authorize_payment" targetRef="gateway"/>
+    <exclusiveGateway id="gateway" name="Authorized?"/>
+    <sequenceFlow id="ok" sourceRef="gateway" targetRef="create_order">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${paymentApproved}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="ko" sourceRef="gateway" targetRef="release_stock">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!paymentApproved}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="create_order" name="Create Order" camunda:class="com.acme.checkout.CreateOrderDelegate" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"/>
+    <sequenceFlow id="f4" sourceRef="create_order" targetRef="end_ok"/>
+    <endEvent id="end_ok" name="OK"/>
+    <serviceTask id="release_stock" name="Release Stock (Compensation)" camunda:class="com.acme.checkout.ReleaseStockDelegate" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"/>
+    <sequenceFlow id="f5" sourceRef="release_stock" targetRef="end_ko"/>
+    <endEvent id="end_ko" name="KO"/>
+  </process>
+</definitions>
+</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">ReleaseStockDelegate.java</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-java">package com.acme.checkout;
+
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ReleaseStockDelegate implements JavaDelegate {
+  @Override
+  public void execute(DelegateExecution ctx) throws Exception {
+    String orderId = (String) ctx.getVariable("orderId");
+    // TODO: call Inventory service to release reservation
+    System.out.println("Releasing stock for order " + orderId);
+  }
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">AuthorizePaymentDelegate.java</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-java">package com.acme.checkout;
+
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.springframework.stereotype.Component;
+
+@Component
+public class AuthorizePaymentDelegate implements JavaDelegate {
+  @Override
+  public void execute(DelegateExecution ctx) throws Exception {
+    // Mock: set paymentApproved from a PSP response
+    boolean approved = true;
+    ctx.setVariable("paymentApproved", approved);
+  }
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">Angular • auth.interceptor.ts</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-typescript">import { Injectable } from '@angular/core';
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class AuthInterceptor implements HttpInterceptor {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const token = localStorage.getItem('jwt');
+    const authReq = token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` }}) : req;
+    return next.handle(authReq);
+  }
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">Angular • orders.service.ts</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-typescript">import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+@Injectable({ providedIn: 'root' })
+export class OrdersService {
+  constructor(private http: HttpClient) {}
+  create(payload: any): Observable<any> {
+    return this.http.post('/api/orders', payload);
+  }
+  getById(id: number): Observable<any> {
+    return this.http.get(`/api/orders/${id}`);
+  }
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">Angular • ws.service.ts</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-typescript">import { Injectable, NgZone } from '@angular/core';
+import { Observable } from 'rxjs';
+
+@Injectable({ providedIn: 'root' })
+export class WebSocketService {
+  events(topic: string): Observable<MessageEvent> {
+    return new Observable(sub => {
+      const url = `wss://api.example.com/ws?topic=${encodeURIComponent(topic)}`;
+      const ws = new WebSocket(url);
+      ws.onmessage = (ev) => sub.next(ev);
+      ws.onerror = (err) => sub.error(err);
+      ws.onclose = () => sub.complete();
+      return () => ws.close();
+    });
+  }
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">Flutter • auth_interceptor.dart</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-dart">import 'package:dio/dio.dart';
+
+class AuthInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final token = ''; // TODO: load JWT from secure storage
+    if (token.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
+    super.onRequest(options, handler);
+  }
+}
+
+Dio buildDio() {
+  final dio = Dio(BaseOptions(baseUrl: 'https://api.example.com'));
+  dio.interceptors.add(AuthInterceptor());
+  return dio;
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">Flutter • orders_api.dart</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-dart">import 'package:dio/dio.dart';
+
+class OrdersApi {
+  final Dio dio;
+  OrdersApi(this.dio);
+
+  Future<Response> create(Map<String, dynamic> payload) {
+    return dio.post('/api/orders', data: payload);
+  }
+
+  // Ejemplo de SSE simple (server-sent events)
+  // Para producción usar paquete específico de SSE.
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">Cypress • checkout.cy.js</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-javascript">describe('Checkout feliz', () => {
+  it('debería crear una orden', () => {
+    cy.visit('/');
+    cy.get('[data-test="add-to-cart"]').first().click();
+    cy.get('[data-test="go-checkout"]').click();
+    cy.intercept('POST', '/api/orders').as('createOrder');
+    cy.get('[data-test="confirm"]').click();
+    cy.wait('@createOrder').its('response.statusCode').should('eq', 200);
+  });
+});</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">Selenium • SeleniumSmokeTest.java</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-java">package com.acme.e2e;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+public class SeleniumSmokeTest {
+  public static void main(String[] args) {
+    WebDriver driver = new ChromeDriver();
+    driver.get("https://shop.example.com");
+    driver.findElement(By.cssSelector("[data-test='login']")).click();
+    // ... completar login y smoke
+    driver.quit();
+  }
+}</code></pre>
+      </section>
+
+      <section class="snippet">
+        <div class="snippet-header">
+          <span class="filename">Appium • AppiumLoginTest.java</span>
+          <div class="actions"><button class="btn-ghost copy">Copiar</button><button class="btn-ghost expand">Expandir</button></div>
+        </div>
+        <pre><code class="language-java">package com.acme.mobile;
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.options.UiAutomator2Options;
+import org.openqa.selenium.By;
+import java.net.URL;
+
+public class AppiumLoginTest {
+  public static void main(String[] args) throws Exception {
+    UiAutomator2Options options = new UiAutomator2Options()
+      .setDeviceName("Android Emulator")
+      .setApp(System.getProperty("user.dir") + "/app-debug.apk");
+    AppiumDriver driver = new AppiumDriver(new URL("http://localhost:4723/"), options);
+    driver.findElement(By.id("loginButton")).click();
+    // ... flujo corto
+    driver.quit();
+  }
+}</code></pre>
+      </section>
+
+    <p class="code-legend">Tip: usá “Expandir” para pantalla completa de un snippet o “Copiar” para volcar al portapapeles.</p>
+  </main>
+  <footer class="site-footer">
+    <small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small>
+  </footer>
+  <script src="js/main.js"></script>
+  <script>
+  // Copy & Expand for snippets
+  document.addEventListener('click', (e)=>{
+    const t = e.target;
+    if(t.classList.contains('copy')){
+      const code = t.closest('.snippet').querySelector('pre code').innerText;
+      navigator.clipboard.writeText(code).then(()=>{ t.textContent='Copiado'; setTimeout(()=>t.textContent='Copiar',1200); });
+    }
+    if(t.classList.contains('expand')){
+      const card = t.closest('.snippet');
+      card.classList.toggle('expanded');
+      t.textContent = card.classList.contains('expanded') ? 'Contraer' : 'Expandir';
+    }
+  });
+  </script>
+
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body>
+</html>

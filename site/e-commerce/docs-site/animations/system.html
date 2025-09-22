@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Animación • Sistema Completo</title>
+<link rel="stylesheet" href="../css/styles.css"/>
+<link rel="stylesheet" href="../css/animations.css"/>
+<style>
+  .anim-svg { width: 100%; height: 560px; background: #0b1320; border:1px solid #1f2836; border-radius:14px;}
+  .node rect { fill:#0f1622; stroke:#2a3446; rx:12; ry:12;}
+  .node text { fill:#cbd5e1; font: 14px ui-monospace, Menlo, Consolas; }
+  .db rect { fill:#0f1c26; }
+  .edge { stroke:#284b63; stroke-width:2; stroke-dasharray:4 6; opacity:.4; }
+  .edge.active { stroke:#6fc3df; opacity:1; }
+  .particle { fill:#9ae6b4; opacity:.95; }
+  .legend { color:#9fb0c9; margin-top:8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="../README.html">E‑Commerce E2E</a>
+  <nav class="main-nav">
+    <a href="../animations.html">Animaciones</a>
+  </nav>
+  <button id="themeToggle" class="btn">🌓</button>
+</header>
+
+<main id="content" class="content fade-in">
+  <h1>Animación del Sistema Completo</h1>
+  <p class="lead">Secuencia: Usuario → OIDC → API GW → BFF → Servicios → Kafka → Bases → ERP/Oracle → Respuesta. Usa los controles para reproducir.</p>
+
+  <div class="anim-stage">
+    <svg viewBox="0 0 1200 560" class="anim-svg" id="sysSvg">
+      <!-- Fila superior: Usuario / Browser / Auth -->
+      <g class="node" id="user"><rect x="40" y="40" width="140" height="52"/><text x="110" y="72" text-anchor="middle">Usuario</text></g>
+      <g class="node" id="browser"><rect x="210" y="40" width="160" height="52"/><text x="290" y="72" text-anchor="middle">Browser/App</text></g>
+      <g class="node" id="auth"><rect x="400" y="40" width="160" height="52"/><text x="480" y="72" text-anchor="middle">Auth (OIDC)</text></g>
+
+      <!-- Fila media: API/BFF/Servicios -->
+      <g class="node" id="apigw"><rect x="40" y="160" width="180" height="56"/><text x="130" y="194" text-anchor="middle">API Gateway</text></g>
+      <g class="node" id="bff"><rect x="250" y="160" width="160" height="56"/><text x="330" y="194" text-anchor="middle">BFF / GraphQL</text></g>
+      <g class="node" id="order"><rect x="450" y="140" width="150" height="48"/><text x="525" y="172" text-anchor="middle">Order</text></g>
+      <g class="node" id="payment"><rect x="450" y="210" width="150" height="48"/><text x="525" y="242" text-anchor="middle">Payment</text></g>
+      <g class="node" id="catalog"><rect x="620" y="140" width="150" height="48"/><text x="695" y="172" text-anchor="middle">Catalog</text></g>
+      <g class="node" id="userSvc"><rect x="620" y="210" width="150" height="48"/><text x="695" y="242" text-anchor="middle">User</text></g>
+
+      <!-- Fila inferior izquierda: Kafka -->
+      <g class="node" id="kafka"><rect x="800" y="170" width="170" height="56"/><text x="885" y="204" text-anchor="middle">Kafka (events)</text></g>
+
+      <!-- Bases de datos -->
+      <g class="node db" id="pg"><rect x="1000" y="120" width="170" height="48"/><text x="1085" y="152" text-anchor="middle">PostgreSQL</text></g>
+      <g class="node db" id="mdb"><rect x="1000" y="180" width="170" height="48"/><text x="1085" y="212" text-anchor="middle">MongoDB</text></g>
+      <g class="node db" id="redis"><rect x="1000" y="240" width="170" height="48"/><text x="1085" y="272" text-anchor="middle">Redis</text></g>
+
+      <!-- ERP / Oracle -->
+      <g class="node db" id="oracle"><rect x="1000" y="320" width="170" height="52"/><text x="1085" y="352" text-anchor="middle">Oracle (ERP)</text></g>
+      <g class="node" id="erp"><rect x="800" y="320" width="170" height="52"/><text x="885" y="352" text-anchor="middle">ERP/WMS/Billing</text></g>
+
+      <!-- Aristas -->
+      <line id="e1" class="edge" x1="180" y1="66" x2="210" y2="66"/>
+      <line id="e2" class="edge" x1="370" y1="66" x2="400" y2="66"/>
+      <line id="e3" class="edge" x1="110" y1="160" x2="110" y2="92"/>
+      <line id="e4" class="edge" x1="220" y1="188" x2="250" y2="188"/>
+      <line id="e5" class="edge" x1="410" y1="168" x2="450" y2="164"/>
+      <line id="e6" class="edge" x1="410" y1="188" x2="450" y2="234"/>
+      <line id="e7" class="edge" x1="410" y1="188" x2="620" y2="164"/>
+      <line id="e8" class="edge" x1="410" y1="188" x2="620" y2="234"/>
+      <line id="e9" class="edge" x1="600" y1="164" x2="800" y2="198"/>
+      <line id="e10" class="edge" x1="600" y1="234" x2="800" y2="198"/>
+      <line id="e11" class="edge" x1="970" y1="144" x2="1000" y2="144"/>
+      <line id="e12" class="edge" x1="970" y1="200" x2="1000" y2="200"/>
+      <line id="e13" class="edge" x1="970" y1="254" x2="1000" y2="254"/>
+      <line id="e14" class="edge" x1="970" y1="346" x2="1000" y2="346"/>
+      <line id="e15" class="edge" x1="970" y1="198" x2="1000" y2="322"/>
+
+      <!-- Partículas -->
+      <circle id="token" r="8" class="particle"/>
+    </svg>
+    <div class="anim-controls">
+      <button class="btn" id="play">▶</button>
+      <button class="btn" id="pause">⏸</button>
+      <button class="btn" id="reset">⟲</button>
+    </div>
+  </div>
+
+  <p class="legend">Paso a paso: 1) Usuario→App (login), 2) App→OIDC (tokens), 3) App→API GW (Bearer), 4) API→BFF, 5) BFF→Servicios, 6) Servicios→Kafka, 7) Persistencia (PG/Mongo/Redis), 8) Integración con ERP/Oracle, 9) Respuesta al usuario.</p>
+</main>
+
+<footer class="site-footer"><small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small></footer>
+<script src="../js/main.js"></script>
+<script>
+(function(){
+  const token = document.getElementById('token');
+  const steps = [
+    {x: 110, y: 66},   // Usuario
+    {x: 290, y: 66},   // Browser/App
+    {x: 480, y: 66},   // Auth OIDC
+    {x: 130, y: 188},  // API GW
+    {x: 330, y: 188},  // BFF
+    {x: 525, y: 164},  // Order
+    {x: 525, y: 234},  // Payment
+    {x: 695, y: 164},  // Catalog
+    {x: 695, y: 234},  // User
+    {x: 885, y: 198},  // Kafka
+    {x: 1085, y: 144}, // PG
+    {x: 1085, y: 200}, // Mongo
+    {x: 1085, y: 254}, // Redis
+    {x: 885, y: 346},  // ERP
+    {x: 1085, y: 346}, // Oracle
+    {x: 290, y: 66}    // Respuesta → Browser
+  ];
+  const edges = ['e1','e2','e3','e4','e5','e6','e7','e8','e9','e10','e11','e12','e13','e14','e15'];
+
+  let idx=0, t=null;
+  function activateEdges(i){
+    edges.forEach((id,k)=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.classList.toggle('active', k < i);
+    });
+  }
+  function move(){
+    const s = steps[Math.min(idx, steps.length-1)];
+    token.setAttribute('cx', s.x);
+    token.setAttribute('cy', s.y);
+  }
+  function render(){ activateEdges(idx); move(); }
+  function play(){ if(t) return; t=setInterval(()=>{ idx++; if(idx>steps.length){ pause(); return; } render(); }, 850); }
+  function pause(){ clearInterval(t); t=null; }
+  function reset(){ pause(); idx=0; render(); }
+  document.getElementById('play').onclick=play;
+  document.getElementById('pause').onclick=pause;
+  document.getElementById('reset').onclick=reset;
+  reset();
+})();
+</script>
+
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body>
+</html>

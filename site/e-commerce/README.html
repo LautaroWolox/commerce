@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Índice • E‑commerce</title>
+  <meta name="description" content="Documentación E2E de la arquitectura E-commerce." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>if (window.mermaid) { mermaid.initialize({ startOnLoad: true, theme: 'dark' }); }</script>
+</head>
+<body>
+
+  <header class="site-header" role="banner" aria-label="Cabecera">
+    <a class="brand" href="README.html" aria-label="Ir a inicio">E‑Commerce E2E</a>
+    
+    <nav class="main-nav" role="navigation" aria-label="Navegación principal">
+      <a href="README.html">Índice</a>
+      <a href="architecture.html">Arquitectura</a>
+      <a href="checkout.html">Checkout</a>
+      <a href="kafka.html">Kafka</a>
+      <a href="openai.html">OpenAI</a>
+      <a href="deploy.html">Despliegue</a>
+      <a href="observability.html">Observabilidad</a>
+      <a href="databases.html">Datos</a>
+      <a href="code.html">Código</a>
+      <a href="deployments.html">Dev→Prod</a>
+      <a href="docs.html">Docs Técnicos</a>
+      <a href="diagrams.html">Diagramas</a>
+      <a href="animations.html">Animaciones</a>
+    </nav>
+    <button id="themeToggle" class="btn" aria-pressed="false" aria-label="Cambiar tema">🌓</button>
+  </header>
+  <main id="content" tabindex="-1">
+
+<section class="hero fade-in">
+  <h1>Arquitectura E‑commerce End‑to‑End</h1>
+  <p class="lead">Plataforma enterprise cloud + on‑prem: resiliente, escalable, segura y con IA aplicada al negocio.</p>
+  <div class="badges">
+    <a class="badge" href="architecture.html">Arquitectura</a>
+    <a class="badge" href="checkout.html">Checkout</a>
+    <a class="badge" href="kafka.html">Kafka</a>
+    <a class="badge" href="openai.html">OpenAI</a>
+    <a class="badge" href="deploy.html">Blue/Green + Canary</a>
+    <a class="badge" href="observability.html">Observabilidad</a>
+    <a class="badge" href="databases.html">Datos</a>
+    <a class="badge" href="animations.html">Animación E2E</a>
+  </div>
+</section>
+
+<section class="content fade-in">
+  <h2>Prólogo</h2>
+  <p>Este proyecto entrega una arquitectura integral de e‑commerce diseñada para altos niveles de demanda y criticidad.
+  Se prioriza <strong>resiliencia</strong>, <strong>escalabilidad</strong>, <strong>seguridad</strong> y <strong>observabilidad</strong>, integrando cloud-native (GCP/GKE/Istio) con sistemas on‑prem (OCP4/Oracle).
+  Kafka estructura el backbone de eventos; OAuth2/OIDC protege el acceso; OpenAI potencia la conversión; Tekton automatiza la calidad; Dynatrace cierra la trazabilidad end‑to‑end.</p>
+
+  <h2>Tecnologías y el porqué</h2>
+  <ul><li><strong>Arquitectura Integral</strong>: incluye BPMN de checkout con compensaciones, delegates Camunda, QA automatizado y ejemplos front (Angular/Flutter) para cerrar la trazabilidad end‑to‑end.</li>
+    <li><strong>GCP + GKE / OCP4</strong>: orquestación enterprise con autoscaling y despliegues reproducibles.</li>
+    <li><strong>Istio</strong>: mTLS, control de tráfico (canary/blue‑green) y métricas detalladas.</li>
+    <li><strong>Kafka + Schema Registry</strong>: streams de eventos confiables y desacoplados.</li>
+    <li><strong>PostgreSQL / MongoDB / Redis / Oracle</strong>: cada motor optimizado para su workload.</li>
+    <li><strong>OAuth2/OIDC + CyberArk</strong>: identidad estándar + gestión enterprise de secretos.</li>
+    <li><strong>OpenAI Agents</strong>: personalización y asistencia inteligente.</li>
+    <li><strong>Camunda</strong>: orquestación de procesos complejos con compensaciones.</li>
+    <li><strong>OpenTelemetry + Dynatrace</strong>: trazabilidad, SLOs, y detección proactiva.</li>
+    <li><strong>Tekton (SAST/DAST/E2E)</strong>: pipelines seguros con gates de calidad.</li>
+  </ul>
+
+  </section>
+
+  </main>
+<footer class="site-footer">
+  <small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small>
+</footer>
+  <script src="js/main.js"></script>
+  <script src="js/animations.js"></script>
+
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body>
+</html>

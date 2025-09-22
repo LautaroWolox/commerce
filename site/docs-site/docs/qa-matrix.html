@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Matriz de Casos de Prueba • E‑commerce</title>
+  <link rel="stylesheet" href="../css/styles.css"/>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="../README.html">E‑Commerce E2E</a>
+  <nav class="main-nav">
+    <a href="../docs.html">Docs Técnicos</a>
+    <a href="../diagrams.html">Diagramas</a>
+    <a href="../animations.html">Animaciones</a>
+  </nav>
+  <button id="themeToggle" class="btn">🌓</button>
+</header>
+<main id="content" class="content fade-in">
+  <h1>Matriz de Casos de Prueba</h1>
+  <p class="lead">Trazabilidad funcional → automatización.</p>
+  <table class="table">
+    <thead><tr><th>TC</th><th>Funcionalidad</th><th>Detalle</th><th>Automatización</th><th>Herramienta</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>TC-001</td><td>Login OIDC</td><td>Flujo login/logout con proveedor</td><td>✅</td><td>Selenium/Appium</td><td>Stable</td></tr>
+      <tr><td>TC-010</td><td>Catálogo</td><td>Búsqueda y filtros</td><td>✅</td><td>Cypress</td><td>Stable</td></tr>
+      <tr><td>TC-020</td><td>Carrito</td><td>Agregar/Quitar ítems</td><td>✅</td><td>Cypress</td><td>Stable</td></tr>
+      <tr><td>TC-030</td><td>Checkout</td><td>Flujo feliz (pago aprobado)</td><td>✅</td><td>Cypress + k6</td><td>Stable</td></tr>
+      <tr><td>TC-031</td><td>Checkout KO</td><td>Pago rechazado → compensación</td><td>✅</td><td>Cypress</td><td>Stable</td></tr>
+      <tr><td>TC-040</td><td>Órdenes</td><td>Detalle y tracking por eventos</td><td>🟡</td><td>Cypress</td><td>WIP</td></tr>
+      <tr><td>TC-050</td><td>Resiliencia</td><td>Retries/Timeouts/CB Order/Payment</td><td>🟡</td><td>k6 + Faults/ISTIO</td><td>WIP</td></tr>
+      <tr><td>TC-060</td><td>Seguridad</td><td>mTLS, scopes/roles</td><td>🟡</td><td>Postman/Newman</td><td>WIP</td></tr>
+    </tbody>
+  </table>
+</main>
+<footer class="site-footer"><small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small></footer>
+<script src="../js/main.js"></script>
+
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body></html>

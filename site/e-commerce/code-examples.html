@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>E-commerce • Código</title>
+  <meta name="description" content="Frontend de documentación para arquitectura E-commerce E2E." />
+  <link rel="preload" href="css/styles.css" as="style" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <!-- Mermaid for diagrams page only; safe to load on all pages (no render if no .mermaid blocks) -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    }
+  </script>
+</head>
+<body>
+  
+    <header class="site-header" role="banner" aria-label="Cabecera">
+      <a class="brand" href="index.html" aria-label="Ir a inicio">E-Commerce E2E</a>
+      <nav class="main-nav" role="navigation" aria-label="Navegación principal">
+        <a href="architecture.html" class="">Arquitectura</a>
+        <a href="databases.html" class="">Datos</a>
+        <a href="implementation.html" class="">Implementación</a>
+        <a href="security.html" class="">Seguridad</a>
+        <a href="performance.html" class="">Performance</a>
+        <a href="business-case.html" class="">Business Case</a>
+        <a href="diagrams.html" class="">Diagramas</a>
+        <a href="code-examples.html" class="active">Código</a>
+              <a href="animations.html" class="">Animaciones</a>
+      </nav>
+      <button id="themeToggle" class="btn" aria-pressed="false" aria-label="Cambiar tema">🌓</button>
+    </header>
+    
+  <main id="content" tabindex="-1">
+    
+<section class="content fade-in">
+  <h1>Ejemplos de Código (Java 21 + Spring Boot)</h1>
+  <p>Plantillas listas para compilar con <code>Java 21</code> y <code>Spring Boot 3.x</code>.</p>
+
+  <h2>build.gradle (Kotlin DSL)</h2>
+  <pre><code>plugins {{
+  id("org.springframework.boot") version "3.3.2"
+  id("io.spring.dependency-management") version "1.1.5"
+  java
+}}
+java {{
+  toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+}}
+repositories {{ mavenCentral() }}
+dependencies {{
+  implementation("org.springframework.boot:spring-boot-starter-web")
+  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+  implementation("org.springframework.kafka:spring-kafka")
+  implementation("io.opentelemetry:opentelemetry-api:1.40.0")
+  implementation("io.opentelemetry:opentelemetry-sdk:1.40.0")
+  implementation("io.opentelemetry:opentelemetry-exporter-otlp:1.40.0")
+  testImplementation("org.springframework.boot:spring-boot-starter-test")
+}}
+</code></pre>
+
+  <h2>application.yml</h2>
+  <pre><code>server:
+  port: 8080
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://auth.example.com/realms/commerce
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: orders-svc
+      auto-offset-reset: earliest
+    properties:
+      schema.registry.url: http://schema-registry:8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://dynatrace-otel-collector:4317
+  resource:
+    attributes: service.name=order-service,service.version=1.0.0,service.instance.id=\${HOSTNAME}
+</code></pre>
+
+  <h2>SecurityConfig (OAuth2 Resource Server)</h2>
+  <pre><code class="language-java">package com.acme.orders.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {{
+  @Bean
+  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {{
+    http.authorizeHttpRequests(auth -> auth
+        .requestMatchers("/actuator/**").permitAll()
+        .anyRequest().authenticated())
+      .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+    return http.build();
+  }}
+}}
+</code></pre>
+
+  <h2>KafkaConfig</h2>
+  <pre><code class="language-java">package com.acme.orders.config;
+
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.TopicBuilder;
+
+@Configuration
+public class KafkaConfig {{
+  @Bean
+  NewTopic ordersTopic() {{
+    return TopicBuilder.name("orders.events").partitions(6).replicas(3).build();
+  }}
+}}
+</code></pre>
+
+  <h2>OrderController + Tracing</h2>
+  <pre><code class="language-java">package com.acme.orders.api;
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {{
+  private final Tracer tracer;
+  public OrderController(Tracer tracer) {{ this.tracer = tracer; }}
+
+  @PostMapping
+  public ResponseEntity&lt;String&gt; create(@RequestBody String payload) {{
+    Span span = tracer.spanBuilder("createOrder").startSpan();
+    try {{
+      // TODO: validar y persistir
+      return ResponseEntity.ok("created");
+    }} finally {{
+      span.end();
+    }}
+  }}
+}}
+</code></pre>
+
+  <h2>Kafka Producer/Consumer (simplificado)</h2>
+  <pre><code class="language-java">package com.acme.orders.messaging;
+
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+
+@Component
+public class OrderMessaging {{
+  private final KafkaTemplate&lt;String, String&gt; kafkaTemplate;
+  public OrderMessaging(KafkaTemplate&lt;String, String&gt; kafkaTemplate) {{ this.kafkaTemplate = kafkaTemplate; }}
+
+  public void publishCreated(String orderId) {{
+    kafkaTemplate.send("orders.events", orderId, "CREATED");
+  }}
+
+  @KafkaListener(topics = "orders.events", groupId = "orders-svc")
+  public void onEvent(String message) {{
+    // procesar evento
+  }}
+}}
+</code></pre>
+
+  <h2>OpenShift (OCP4) + Istio Canary</h2>
+  <pre><code>---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-svc-v1
+  labels: {{ app: order-svc, version: v1 }}
+spec:
+  replicas: 3
+  selector: {{ matchLabels: {{ app: order-svc, version: v1 }} }}
+  template:
+    metadata:
+      labels: {{ app: order-svc, version: v1 }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: app
+          image: registry/commerce/order-svc:1.0.0
+          ports: [{{containerPort: 8080}}]
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/otel/opentelemetry-javaagent.jar"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://dynatrace-otel-collector:4317"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-svc-v2
+  labels: {{ app: order-svc, version: v2 }}
+spec:
+  replicas: 1
+  selector: {{ matchLabels: {{ app: order-svc, version: v2 }} }}
+  template:
+    metadata:
+      labels: {{ app: order-svc, version: v2 }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: app
+          image: registry/commerce/order-svc:1.1.0
+          ports: [{{containerPort: 8080}}]
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata: {{ name: order-svc }}
+spec:
+  host: order-svc
+  subsets:
+    - name: v1
+      labels: {{ version: v1 }}
+    - name: v2
+      labels: {{ version: v2 }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata: {{ name: order-svc }}
+spec:
+  hosts: ["order-svc"]
+  http:
+    - route:
+        - destination: {{ host: order-svc, subset: v1 }}
+          weight: 90
+        - destination: {{ host: order-svc, subset: v2 }}
+          weight: 10
+</code></pre>
+
+  <h2>Tekton Pipeline (seguridad y pruebas)</h2>
+  <pre><code>---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata: {{ name: order-svc-ci }}
+spec:
+  tasks:
+    - name: unit-tests
+      taskRef: {{ name: maven }}
+      params:
+        - name: GOALS
+          value: ["-B","test"]
+    - name: sast-trivy
+      runAfter: ["unit-tests"]
+      taskSpec:
+        steps:
+          - name: scan
+            image: aquasec/trivy:latest
+            script: |
+              trivy fs --exit-code 1 --severity HIGH,CRITICAL .
+    - name: owasp-zap-dast
+      runAfter: ["sast-trivy"]
+      taskSpec:
+        steps:
+          - name: zap
+            image: ghcr.io/zaproxy/zaproxy:stable
+            script: |
+              zap-baseline.py -t http://order-svc:8080 -m 1 -I -r zap_report.html || true
+    - name: build-and-push
+      runAfter: ["owasp-zap-dast"]
+      taskRef: {{ name: buildah }}
+      params:
+        - name: IMAGE
+          value: registry/commerce/order-svc:$(params.sha)
+    - name: deploy-canary
+      runAfter: ["build-and-push"]
+      taskSpec:
+        steps:
+          - name: kubectl
+            image: bitnami/kubectl:latest
+            script: |
+              kubectl apply -f k8s/istio-canary.yaml
+    - name: e2e-tests
+      runAfter: ["deploy-canary"]
+      taskSpec:
+        steps:
+          - name: k6
+            image: grafana/k6:latest
+            script: |
+              k6 run tests/e2e.js
+    - name: quality-gates
+      runAfter: ["e2e-tests"]
+      taskSpec:
+        steps:
+          - name: gate
+            image: alpine:3.19
+            script: |
+              # Chequear SLOs desde Prometheus/Dynatrace API y decidir rollback
+              echo "OK"
+</code></pre>
+
+  <h2>Dynatrace/OTel (Java Agent)</h2>
+  <pre><code># En el contenedor:
+ENV JAVA_TOOL_OPTIONS="-javaagent:/otel/opentelemetry-javaagent.jar"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://dynatrace-otel-collector:4317
+ENV OTEL_SERVICE_NAME=order-service
+ENV OTEL_RESOURCE_ATTRIBUTES=service.version=1.1.0
+
+# Spring actuador expuesto:
+management.endpoints.web.exposure.include=health,info,prometheus
+</code></pre>
+</section>
+
+  </main>
+  <footer class="site-footer">
+    <small>© 2025 Arquitectura E-commerce E2E • Documentación estática</small>
+  </footer>
+  <script src="js/main.js"></script>
+  <script src="js/animations.js"></script>
+
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body>
+</html>

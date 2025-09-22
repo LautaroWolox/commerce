@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Docs Técnicos • E‑commerce</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="README.html">E‑Commerce E2E</a>
+    
+  
+  </header>
+  <main id="content" class="content fade-in">
+    <h1>Documentación Técnica (Circuitos)</h1>
+    <p class="lead">Detalle de flujos clave: autenticación, órdenes/pagos, caché y persistencia, resiliencia, y observabilidad.</p>
+
+    <h2>Autenticación OAuth2/OIDC</h2>
+    <div class="mermaid">sequenceDiagram
+      participant U as Usuario
+      participant B as Browser
+      participant G as API Gateway
+      participant A as Auth (OIDC)
+      participant BFF as BFF
+      U->>B: Navega y acciona
+      B->>G: Request a API
+      G->>A: Redirect OIDC
+      A-->>B: Login + JWT
+      B->>G: Request con Bearer JWT
+      G->>BFF: Forward con mTLS
+      BFF-->>B: Respuesta
+    </div>
+
+    <h2>Órdenes y Pagos (eventos)</h2>
+    <div class="mermaid">sequenceDiagram
+      participant O as Order Svc
+      participant K as Kafka
+      participant P as Payment Svc
+      participant DB as PostgreSQL
+      O->>K: publish OrderCreated
+      K-->>P: consume
+      P->>DB: persist payment
+      P-->>O: payment OK
+    </div>
+
+    <h2>Caché y Persistencia</h2>
+    <div class="mermaid">flowchart LR
+      BFF --> Redis[(Redis Cache)]
+      BFF --> Order
+      Order --> PG[(PostgreSQL)]
+      Catalog --> MDB[(MongoDB)]
+    </div>
+
+    <h2>Resiliencia (Istio)</h2>
+    <div class="mermaid">flowchart TD
+      Client --> GW["Gateway"]
+      GW --> SvcA
+      SvcA --> SvcB
+      classDef danger fill:#4b2a2a,stroke:#7a3e3e,color:#fff
+      SvcB:::danger -->|timeout| Retry["Retry + Circuit Breaker"]
+    </div>
+
+    <h2>Observabilidad (OTel→Dynatrace)</h2>
+    <div class="mermaid">flowchart TD
+      BFF --> OTel["OpenTelemetry SDK"]
+      OTel --> Collector["OTLP Collector"]
+      Collector --> Dynatrace["Dynatrace Backend"]
+      Dynatrace --> SLO["SLO Dashboard"]
+    </div>
+  </main>
+  <footer class="site-footer">
+    <small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small>
+  </footer>
+  <script src="js/main.js"></script>
+</body>
+</html>

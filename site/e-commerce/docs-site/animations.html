@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Animaciones • E‑commerce</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    .anim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:10px}
+    .anim-card{border:1px solid #1f2836;border-radius:14px;background:#0f1622;padding:12px}
+    .anim-card h3{margin:0 0 6px 0}
+    .viewer{border:1px solid #1f2836;border-radius:14px;overflow:hidden;margin-top:16px}
+    .viewer iframe{width:100%;height:620px;border:0;background:#0b1320}
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="README.html">E‑Commerce E2E</a>
+  <nav class="main-nav">
+    <a href="README.html">Índice</a>
+    <a href="architecture.html">Arquitectura</a>
+    <a href="checkout.html">Checkout</a>
+    <a href="kafka.html">Kafka</a>
+    <a href="openai.html">OpenAI</a>
+    <a href="deploy.html">Despliegue</a>
+    <a href="observability.html">Observabilidad</a>
+    <a href="databases.html">Datos</a>
+    <a href="code.html">Código</a>
+    <a href="deployments.html">Dev→Prod</a>
+    <a href="docs.html">Docs Técnicos</a>
+    <a href="diagrams.html">Diagramas</a>
+    <a href="animations.html" class="active">Animaciones</a>
+  </nav>
+  <button id="themeToggle" class="btn">🌓</button>
+</header>
+
+<main id="content" class="content fade-in">
+  <h1>Animaciones</h1>
+  <p class="lead">Elegí una animación para visualizar aquí mismo. Por defecto se muestra el <b>diagrama animado del sistema completo</b>.</p>
+
+  <div class="anim-grid">
+    <div class="anim-card">
+      <h3>Sistema Completo</h3>
+      <p>Usuario → OIDC → API GW → BFF → MS → Kafka → DBs → ERP/Oracle.</p>
+      <button class="btn load" data-src="animations/system.html">Ver aquí</button>
+    </div>
+    <div class="anim-card">
+      <h3>Arquitectura</h3>
+      <p>API GW ↔ BFF ↔ Servicios ↔ DB/Kafka.</p>
+      <button class="btn load" data-src="animations/architecture.html">Ver aquí</button>
+    </div>
+    <div class="anim-card">
+      <h3>Kafka</h3>
+      <p>Productor → Topic → Consumidor.</p>
+      <button class="btn load" data-src="animations/kafka.html">Ver aquí</button>
+    </div>
+    <div class="anim-card">
+      <h3>OpenAI Agents</h3>
+      <p>Usuario ↔ BFF ↔ Agente/Reco.</p>
+      <button class="btn load" data-src="animations/openai.html">Ver aquí</button>
+    </div>
+  </div>
+
+  <div class="viewer">
+    <iframe id="animFrame" src="animations/system.html" title="visor de animaciones"></iframe>
+  </div>
+</main>
+
+<footer class="site-footer"><small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small></footer>
+<script src="js/main.js"></script>
+<script>
+  document.addEventListener('click', (e)=>{
+    const t=e.target;
+    if(t.classList.contains('load')){
+      const src=t.dataset.src;
+      document.getElementById('animFrame').src=src;
+      document.querySelectorAll('.anim-card .btn').forEach(b=>b.classList.remove('active'));
+      t.classList.add('active');
+    }
+  });
+</script>
+
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body>
+</html>

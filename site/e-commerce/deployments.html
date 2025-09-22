@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dev→Prod • E‑commerce</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="README.html">E‑Commerce E2E</a>
+    
+  
+  </header>
+  <main id="content" class="content fade-in">
+    <h1>Despliegues: Dev → QA → Staging → Prod</h1>
+    <p class="lead">Flujos controlados de promoción con <strong>Tekton</strong>, despliegues <strong>Istio Canary</strong> y <strong>Blue/Green</strong>, gestión de versiones (<strong>SemVer</strong>) y proceso de <strong>hotfix</strong>.</p>
+
+    <h2>Flujo de promoción</h2>
+    <div class="mermaid">flowchart LR
+      Dev((Dev)) --> QA((QA))
+      QA --> Stg((Staging))
+      Stg --> Prod((Prod))
+      style Dev fill:#1a2230,stroke:#2a3446
+      style QA fill:#1a2230,stroke:#2a3446
+      style Stg fill:#1a2230,stroke:#2a3446
+      style Prod fill:#1a2230,stroke:#2a3446
+    </div>
+
+    <h2>Versionado (SemVer)</h2>
+    <ul>
+      <li><code>MAJOR.MINOR.PATCH</code> → ejemplo: <code>1.2.3</code></li>
+      <li>Release estable: tag <code>v1.2.0</code></li>
+      <li>Hotfix: <code>v1.2.1</code> (PATCH)</li>
+    </ul>
+
+    <h2>Pipeline de CI/CD (Tekton)</h2>
+    <p>Incluye: unit tests → SAST → DAST → build/push → deploy canary → E2E → gates de calidad → promoción.</p>
+    <pre><code>kubectl apply -f tekton/pipeline.yaml
+tkn pipeline start order-svc-ci --param sha=$(git rev-parse --short HEAD) -n cicd</code></pre>
+
+    <h2>Canary y Blue/Green (Istio)</h2>
+    <div class="mermaid">flowchart LR
+      User --> GW["Istio Gateway"]
+      GW -->|90%| V1["Blue v1"]
+      GW -->|10%| V2["Green v2 (canary)"]
+    </div>
+
+    <h2>Promoción de versión</h2>
+    <pre><code># Aumentar peso a v2 si métricas OK
+kubectl patch virtualservice order-svc --type merge -p '
+spec:
+  http:
+  - route:
+    - destination: { host: order-svc, subset: v1 }
+      weight: 50
+    - destination: { host: order-svc, subset: v2 }
+      weight: 50
+'</code></pre>
+
+    <h2>Rollback</h2>
+    <pre><code># Volver al 100% v1
+kubectl patch virtualservice order-svc --type merge -p '
+spec:
+  http:
+  - route:
+    - destination: { host: order-svc, subset: v1 }
+      weight: 100
+    - destination: { host: order-svc, subset: v2 }
+      weight: 0
+'</code></pre>
+
+    <h2>Hotfix de Producción</h2>
+    <ol>
+      <li>Crear rama <code>hotfix/v1.2.2</code> desde tag <code>v1.2.1</code>.</li>
+      <li>Aplicar fix minimal, correr pipeline.</li>
+      <li>Desplegar directo a <strong>Staging</strong> y luego a <strong>Prod</strong> con canary 5%→25%→50%→100%.</li>
+      <li>Crear tag <code>v1.2.2</code> y merge a <code>main</code> y <code>release/1.2</code>.</li>
+    </ol>
+  </main>
+  <footer class="site-footer">
+    <small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small>
+  </footer>
+  <script src="js/main.js"></script>
+</body>
+</html>

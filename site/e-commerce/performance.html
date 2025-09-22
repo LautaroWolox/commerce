@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>E‑commerce • Performance</title>
+  <meta name="description" content="Frontend de documentación para arquitectura E-commerce E2E." />
+  <link rel="preload" href="css/styles.css" as="style" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+  
+    <header class="site-header" role="banner" aria-label="Cabecera">
+      <a class="brand" href="index.html" aria-label="Ir a inicio">E‑Commerce E2E</a>
+      <nav class="main-nav" role="navigation" aria-label="Navegación principal">
+        <a href="architecture.html" class="">Arquitectura</a>
+        <a href="databases.html" class="">Datos</a>
+        <a href="implementation.html" class="">Implementación</a>
+        <a href="security.html" class="">Seguridad</a>
+        <a href="performance.html" class="active">Performance</a>
+        <a href="business-case.html" class="">Business Case</a>
+              <a href="animations.html" class="">Animaciones</a>
+      </nav>
+      <button id="themeToggle" class="btn" aria-pressed="false" aria-label="Cambiar tema">🌓</button>
+    </header>
+    
+  <main id="content" tabindex="-1">
+    
+<section class="content fade-in">
+  <h1>Performance, SLOs y Pruebas</h1>
+  <ul>
+    <li>Objetivo p95 &lt; 50ms en BFF para lecturas cacheadas.</li>
+    <li>Benchmarks: Redis ~1ms, Mongo ~8ms, Postgres ~15ms p95.</li>
+    <li>Autoscaling HPA + PodDisruptionBudget.</li>
+    <li>Canary con métricas de error-rate y latencia como gates.</li>
+  </ul>
+
+  <h2>Pruebas Canary</h2>
+  <p>Tráfico gradual 1% → 5% → 10% → 25% → 50% → 100% con rollback automático ante SLO breach.</p>
+</section>
+
+  </main>
+  <footer class="site-footer">
+    <small>© 2025 Arquitectura E‑commerce E2E • Documentación estática</small>
+  </footer>
+  <script src="js/main.js"></script>
+  <script src="js/animations.js"></script>
+
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body>
+</html>

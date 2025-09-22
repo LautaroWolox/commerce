@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diagramas • E‑commerce</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="README.html">E‑Commerce E2E</a>
+  <nav class="main-nav" role="navigation" aria-label="Navegación principal">
+      <a href="README.html">Índice</a>
+      <a href="architecture.html">Arquitectura</a>
+      <a href="checkout.html">Checkout</a>
+      <a href="kafka.html">Kafka</a>
+      <a href="openai.html">OpenAI</a>
+      <a href="deploy.html">Despliegue</a>
+      <a href="observability.html">Observabilidad</a>
+      <a href="databases.html">Datos</a>
+      <a href="code.html">Código</a>
+      <a href="deployments.html">Dev→Prod</a>
+      <a href="docs.html">Docs Técnicos</a>
+      <a href="diagrams.html">Diagramas</a>
+      <a href="animations.html">Animaciones</a>
+    </nav>
+  <button id="themeToggle" class="btn">🌓</button>
+</header>
+<main id="content" class="content fade-in">
+  <h1>Diagramas consolidados</h1>
+  <p class="lead">Cada bloque es <strong>Mermaid</strong> renderizado. Podés copiar el código con el botón y abrir <a href="https://mermaid.live/" target="_blank" rel="noopener">mermaid.live</a> para editar.</p>
+
+  <section class="card">
+    <div class="flex items-center justify-between">
+      <h2>Diagrama completo del sistema</h2>
+      <div>
+        <button class="btn copy" data-code-id="Diagrama completo del sistema">Copiar Mermaid</button>
+        <a class="btn" href="https://mermaid.live/" target="_blank" rel="noopener">Abrir en Mermaid Live ↗</a>
+      </div>
+    </div>
+    <pre id="Diagrama completo del sistema" class="hidden">flowchart LR
+  %% Dominios y topología
+  subgraph GCP[&quot;☁️ GCP (GKE + Istio + Dynatrace)&quot;]
+    API[&quot;API Gateway / Ingress&quot;]
+    Auth[&quot;Auth (OIDC)&quot;]
+    BFF[&quot;BFF / GraphQL&quot;]
+    subgraph SVCs[&quot;Servicios&quot;]
+      Catalog[&quot;Catalog&quot;]
+      Order[&quot;Order&quot;]
+      Payment[&quot;Payment&quot;]
+      User[&quot;User&quot;]
+      Search[&quot;Search&quot;]
+    end
+    Kafka[&quot;Kafka + Schema Registry&quot;]
+    PG[(PostgreSQL)]:::db
+    MDB[(MongoDB)]:::db
+    RDS[(Redis)]:::db
+    OTel[&quot;OpenTelemetry SDK&quot;]
+  end
+  subgraph OnPrem[&quot;🏢 On‑Prem (ERP / Oracle)&quot;]
+    ERP[&quot;ERP/WMS/Billing&quot;]
+    ORA[(Oracle DB)]:::db
+  end
+
+  classDef db fill:#10222e,stroke:#2a3a4b,color:#cbd5e1;
+
+  API --&gt; Auth
+  API --&gt; BFF
+  BFF --&gt; Catalog
+  BFF --&gt; Order
+  BFF --&gt; Payment
+  BFF --&gt; User
+  Catalog --&gt; MDB
+  Order --&gt; PG
+  Payment --&gt; PG
+  User --&gt; PG
+  BFF --&gt; RDS
+  Order --&gt; Kafka
+  Payment --&gt; Kafka
+  ERP --&gt; ORA
+  ERP --&gt; Kafka
+  %% observabilidad
+  BFF --&gt; OTel
+  Order --&gt; OTel
+  Payment --&gt; OTel
+  OTel --&gt; Dynatrace[&quot;Dynatrace Backend&quot;]
+</pre>
+    <div class="mermaid">flowchart LR
+  %% Dominios y topología
+  subgraph GCP[&quot;☁️ GCP (GKE + Istio + Dynatrace)&quot;]
+    API[&quot;API Gateway / Ingress&quot;]
+    Auth[&quot;Auth (OIDC)&quot;]
+    BFF[&quot;BFF / GraphQL&quot;]
+    subgraph SVCs[&quot;Servicios&quot;]
+      Catalog[&quot;Catalog&quot;]
+      Order[&quot;Order&quot;]
+      Payment[&quot;Payment&quot;]
+      User[&quot;User&quot;]
+      Search[&quot;Search&quot;]
+    end
+    Kafka[&quot;Kafka + Schema Registry&quot;]
+    PG[(PostgreSQL)]:::db
+    MDB[(MongoDB)]:::db
+    RDS[(Redis)]:::db
+    OTel[&quot;OpenTelemetry SDK&quot;]
+  end
+  subgraph OnPrem[&quot;🏢 On‑Prem (ERP / Oracle)&quot;]
+    ERP[&quot;ERP/WMS/Billing&quot;]
+    ORA[(Oracle DB)]:::db
+  end
+
+  classDef db fill:#10222e,stroke:#2a3a4b,color:#cbd5e1;
+
+  API --&gt; Auth
+  API --&gt; BFF
+  BFF --&gt; Catalog
+  BFF --&gt; Order
+  BFF --&gt; Payment
+  BFF --&gt; User
+  Catalog --&gt; MDB
+  Order --&gt; PG
+  Payment --&gt; PG
+  User --&gt; PG
+  BFF --&gt; RDS
+  Order --&gt; Kafka
+  Payment --&gt; Kafka
+  ERP --&gt; ORA
+  ERP --&gt; Kafka
+  %% observabilidad
+  BFF --&gt; OTel
+  Order --&gt; OTel
+  Payment --&gt; OTel
+  OTel --&gt; Dynatrace[&quot;Dynatrace Backend&quot;]
+</div>
+  </section>
+
+  <section class="card">
+    <div class="flex items-center justify-between">
+      <h2>Flujo OAuth2/OIDC (login y llamada protegida)</h2>
+      <div>
+        <button class="btn copy" data-code-id="Flujo OAuth2/OIDC (login y llamada protegida)">Copiar Mermaid</button>
+        <a class="btn" href="https://mermaid.live/" target="_blank" rel="noopener">Abrir en Mermaid Live ↗</a>
+      </div>
+    </div>
+    <pre id="Flujo OAuth2/OIDC (login y llamada protegida)" class="hidden">sequenceDiagram
+  participant U as Usuario
+  participant B as Browser/App
+  participant A as Auth (OIDC)
+  participant G as API Gateway
+  participant S as Service (mTLS)
+  U-&gt;&gt;B: Accede a recurso protegido
+  B-&gt;&gt;A: Redirección a Login (OIDC)
+  A--&gt;&gt;B: JWT (ID Token) + Token de Acceso
+  B-&gt;&gt;G: Request con Bearer JWT
+  G-&gt;&gt;S: mTLS + JWT validado (JWKs)
+  S--&gt;&gt;B: Respuesta 200
+</pre>
+    <div class="mermaid">sequenceDiagram
+  participant U as Usuario
+  participant B as Browser/App
+  participant A as Auth (OIDC)
+  participant G as API Gateway
+  participant S as Service (mTLS)
+  U-&gt;&gt;B: Accede a recurso protegido
+  B-&gt;&gt;A: Redirección a Login (OIDC)
+  A--&gt;&gt;B: JWT (ID Token) + Token de Acceso
+  B-&gt;&gt;G: Request con Bearer JWT
+  G-&gt;&gt;S: mTLS + JWT validado (JWKs)
+  S--&gt;&gt;B: Respuesta 200
+</div>
+  </section>
+
+  <section class="card">
+    <div class="flex items-center justify-between">
+      <h2>Checkout E2E (con compensación)</h2>
+      <div>
+        <button class="btn copy" data-code-id="Checkout E2E (con compensación)">Copiar Mermaid</button>
+        <a class="btn" href="https://mermaid.live/" target="_blank" rel="noopener">Abrir en Mermaid Live ↗</a>
+      </div>
+    </div>
+    <pre id="Checkout E2E (con compensación)" class="hidden">sequenceDiagram
+  participant B as BFF
+  participant O as Order
+  participant P as Payment
+  participant I as Inventory
+  participant K as Kafka
+  participant DB as PostgreSQL
+  B-&gt;&gt;O: createOrder()
+  O-&gt;&gt;I: reserveStock()
+  I--&gt;&gt;O: OK
+  O-&gt;&gt;P: authorize(amount)
+  alt Aprobado
+    P--&gt;&gt;O: approved
+    O-&gt;&gt;DB: persist order
+    O-&gt;&gt;K: publish order.created
+  else Rechazado
+    P--&gt;&gt;O: declined
+    O-&gt;&gt;I: releaseStock()  %% compensación
+  end
+</pre>
+    <div class="mermaid">sequenceDiagram
+  participant B as BFF
+  participant O as Order
+  participant P as Payment
+  participant I as Inventory
+  participant K as Kafka
+  participant DB as PostgreSQL
+  B-&gt;&gt;O: createOrder()
+  O-&gt;&gt;I: reserveStock()
+  I--&gt;&gt;O: OK
+  O-&gt;&gt;P: authorize(amount)
+  alt Aprobado
+    P--&gt;&gt;O: approved
+    O-&gt;&gt;DB: persist order
+    O-&gt;&gt;K: publish order.created
+  else Rechazado
+    P--&gt;&gt;O: declined
+    O-&gt;&gt;I: releaseStock()  %% compensación
+  end
+</div>
+  </section>
+
+  <section class="card">
+    <div class="flex items-center justify-between">
+      <h2>Backbone de eventos (Kafka)</h2>
+      <div>
+        <button class="btn copy" data-code-id="Backbone de eventos (Kafka)">Copiar Mermaid</button>
+        <a class="btn" href="https://mermaid.live/" target="_blank" rel="noopener">Abrir en Mermaid Live ↗</a>
+      </div>
+    </div>
+    <pre id="Backbone de eventos (Kafka)" class="hidden">flowchart LR
+  Order --&gt;|pub| Orders[&quot;Topic: orders&quot;]
+  Payment --&gt;|pub| Payments[&quot;Topic: payments&quot;]
+  ERP --&gt;|pub| Stock[&quot;Topic: stock&quot;]
+  Orders --&gt;|sub| Analytics[&quot;Streaming Analytics&quot;]
+  Payments --&gt;|sub| Order
+  Stock --&gt;|sub| Order
+</pre>
+    <div class="mermaid">flowchart LR
+  Order --&gt;|pub| Orders[&quot;Topic: orders&quot;]
+  Payment --&gt;|pub| Payments[&quot;Topic: payments&quot;]
+  ERP --&gt;|pub| Stock[&quot;Topic: stock&quot;]
+  Orders --&gt;|sub| Analytics[&quot;Streaming Analytics&quot;]
+  Payments --&gt;|sub| Order
+  Stock --&gt;|sub| Order
+</div>
+  </section>
+
+  <section class="card">
+    <div class="flex items-center justify-between">
+      <h2>OpenAI Agents (recomendación + asistente)</h2>
+      <div>
+        <button class="btn copy" data-code-id="OpenAI Agents (recomendación + asistente)">Copiar Mermaid</button>
+        <a class="btn" href="https://mermaid.live/" target="_blank" rel="noopener">Abrir en Mermaid Live ↗</a>
+      </div>
+    </div>
+    <pre id="OpenAI Agents (recomendación + asistente)" class="hidden">flowchart TD
+  User[&quot;👤 Usuario&quot;] --&gt; BFF
+  BFF --&gt; AI[&quot;Agent Gateway&quot;]
+  AI --&gt; Reco[&quot;Recomendador (RAG)&quot;]
+  AI --&gt; Chat[&quot;Asistente (Tools)&quot;]
+  Reco --&gt; BFF
+  Chat --&gt; BFF
+  BFF --&gt; User
+</pre>
+    <div class="mermaid">flowchart TD
+  User[&quot;👤 Usuario&quot;] --&gt; BFF
+  BFF --&gt; AI[&quot;Agent Gateway&quot;]
+  AI --&gt; Reco[&quot;Recomendador (RAG)&quot;]
+  AI --&gt; Chat[&quot;Asistente (Tools)&quot;]
+  Reco --&gt; BFF
+  Chat --&gt; BFF
+  BFF --&gt; User
+</div>
+  </section>
+
+  <section class="card">
+    <div class="flex items-center justify-between">
+      <h2>Despliegue Canary + Blue/Green (Istio)</h2>
+      <div>
+        <button class="btn copy" data-code-id="Despliegue Canary + Blue/Green (Istio)">Copiar Mermaid</button>
+        <a class="btn" href="https://mermaid.live/" target="_blank" rel="noopener">Abrir en Mermaid Live ↗</a>
+      </div>
+    </div>
+    <pre id="Despliegue Canary + Blue/Green (Istio)" class="hidden">flowchart LR
+  User --&gt; GW[&quot;Istio Gateway&quot;]
+  GW --&gt;|90%| V1[&quot;Blue v1&quot;]
+  GW --&gt;|10%| V2[&quot;Green v2 (canary)&quot;]
+</pre>
+    <div class="mermaid">flowchart LR
+  User --&gt; GW[&quot;Istio Gateway&quot;]
+  GW --&gt;|90%| V1[&quot;Blue v1&quot;]
+  GW --&gt;|10%| V2[&quot;Green v2 (canary)&quot;]
+</div>
+  </section>
+
+  <section class="card">
+    <div class="flex items-center justify-between">
+      <h2>CI/CD Tekton (promoción por SLO)</h2>
+      <div>
+        <button class="btn copy" data-code-id="CI/CD Tekton (promoción por SLO)">Copiar Mermaid</button>
+        <a class="btn" href="https://mermaid.live/" target="_blank" rel="noopener">Abrir en Mermaid Live ↗</a>
+      </div>
+    </div>
+    <pre id="CI/CD Tekton (promoción por SLO)" class="hidden">flowchart LR
+  GIT[&quot;Git push&quot;] --&gt; CI[Unit Tests]
+  CI --&gt; SAST[Trivy SAST]
+  SAST --&gt; Build[Build/Push]
+  Build --&gt; DAST[ZAP DAST]
+  DAST --&gt; Deploy[Deploy Canary]
+  Deploy --&gt; E2E[k6 E2E]
+  E2E --&gt; GATE[Quality Gates/SLO]
+  GATE --&gt;|OK| Promote[Promote → Prod]
+  GATE --&gt;|FAIL| Rollback[Rollback]
+</pre>
+    <div class="mermaid">flowchart LR
+  GIT[&quot;Git push&quot;] --&gt; CI[Unit Tests]
+  CI --&gt; SAST[Trivy SAST]
+  SAST --&gt; Build[Build/Push]
+  Build --&gt; DAST[ZAP DAST]
+  DAST --&gt; Deploy[Deploy Canary]
+  Deploy --&gt; E2E[k6 E2E]
+  E2E --&gt; GATE[Quality Gates/SLO]
+  GATE --&gt;|OK| Promote[Promote → Prod]
+  GATE --&gt;|FAIL| Rollback[Rollback]
+</div>
+  </section>
+
+  <section class="card">
+    <div class="flex items-center justify-between">
+      <h2>Hotfix de Producción (GitFlow)</h2>
+      <div>
+        <button class="btn copy" data-code-id="Hotfix de Producción (GitFlow)">Copiar Mermaid</button>
+        <a class="btn" href="https://mermaid.live/" target="_blank" rel="noopener">Abrir en Mermaid Live ↗</a>
+      </div>
+    </div>
+    <pre id="Hotfix de Producción (GitFlow)" class="hidden">flowchart TD
+  REL[&quot;release/x.y&quot;] --&gt;|bug| HOT[&quot;hotfix/x.y.z&quot;]
+  HOT --&gt; CI
+  CI --&gt; Deploy
+  Deploy --&gt;|canary 5→100%| Prod
+  Prod --&gt; Tag[&quot;tag vX.Y.Z&quot;]
+  Tag --&gt; MergeMain[&quot;merge → main&quot;]
+  Tag --&gt; MergeRel[&quot;merge → release/x.y&quot;]
+</pre>
+    <div class="mermaid">flowchart TD
+  REL[&quot;release/x.y&quot;] --&gt;|bug| HOT[&quot;hotfix/x.y.z&quot;]
+  HOT --&gt; CI
+  CI --&gt; Deploy
+  Deploy --&gt;|canary 5→100%| Prod
+  Prod --&gt; Tag[&quot;tag vX.Y.Z&quot;]
+  Tag --&gt; MergeMain[&quot;merge → main&quot;]
+  Tag --&gt; MergeRel[&quot;merge → release/x.y&quot;]
+</div>
+  </section>
+
+  <section class="card">
+    <div class="flex items-center justify-between">
+      <h2>Observabilidad OTel → Dynatrace</h2>
+      <div>
+        <button class="btn copy" data-code-id="Observabilidad OTel → Dynatrace">Copiar Mermaid</button>
+        <a class="btn" href="https://mermaid.live/" target="_blank" rel="noopener">Abrir en Mermaid Live ↗</a>
+      </div>
+    </div>
+    <pre id="Observabilidad OTel → Dynatrace" class="hidden">flowchart TD
+  App --&gt; SDK[&quot;OTel SDK&quot;]
+  SDK --&gt; COL[&quot;OTLP Collector&quot;]
+  COL --&gt; DT[&quot;Dynatrace&quot;]
+  DT --&gt; SLO[&quot;SLO Dashboards&quot;]
+</pre>
+    <div class="mermaid">flowchart TD
+  App --&gt; SDK[&quot;OTel SDK&quot;]
+  SDK --&gt; COL[&quot;OTLP Collector&quot;]
+  COL --&gt; DT[&quot;Dynatrace&quot;]
+  DT --&gt; SLO[&quot;SLO Dashboards&quot;]
+</div>
+  </section>
+
+  <section class="card">
+    <div class="flex items-center justify-between">
+      <h2>Mapeo microservicios → bases de datos</h2>
+      <div>
+        <button class="btn copy" data-code-id="Mapeo microservicios → bases de datos">Copiar Mermaid</button>
+        <a class="btn" href="https://mermaid.live/" target="_blank" rel="noopener">Abrir en Mermaid Live ↗</a>
+      </div>
+    </div>
+    <pre id="Mapeo microservicios → bases de datos" class="hidden">flowchart LR
+  Catalog --&gt; MDB[(MongoDB)]
+  Search --&gt; MDB
+  Order --&gt; PG[(PostgreSQL)]
+  Payment --&gt; PG
+  User --&gt; PG
+  BFF --&gt; RDS[(Redis Cache)]
+  ERP --&gt; ORA[(Oracle)]
+</pre>
+    <div class="mermaid">flowchart LR
+  Catalog --&gt; MDB[(MongoDB)]
+  Search --&gt; MDB
+  Order --&gt; PG[(PostgreSQL)]
+  Payment --&gt; PG
+  User --&gt; PG
+  BFF --&gt; RDS[(Redis Cache)]
+  ERP --&gt; ORA[(Oracle)]
+</div>
+  </section>
+
+</main>
+<footer class="site-footer"><small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small></footer>
+<script src="js/main.js"></script>
+<script>
+document.addEventListener('click', (e)=>{
+  const t=e.target;
+  if(t.classList.contains('copy')){
+    const id=t.getAttribute('data-code-id');
+    const code=document.getElementById(id).innerText;
+    navigator.clipboard.writeText(code).then(()=>{ t.textContent='Copiado'; setTimeout(()=>t.textContent='Copiar Mermaid',1200); });
+  }
+});
+</script>
+
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="es" data-theme="dark"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Animación</title><link rel="stylesheet" href="../css/styles.css"/><link rel="stylesheet" href="../css/animations.css"/>
+</head><body>
+<header class="site-header"><a class="brand" href="../README.html">E‑Commerce E2E</a>
+<nav class="main-nav"><a href="../animations.html">Volver</a></nav><button id="themeToggle" class="btn">🌓</button></header>
+<main id="content" class="content fade-in">
+<h1>Animación • OpenAI Agents</h1>
+<div class="anim-stage">
+<svg viewBox="0 0 1100 520" class="anim-svg" id="aiSvg">
+  <g id="user" class="node"><rect x="100" y="100" width="160" height="60" rx="12" class="browser"/><text x="180" y="135" text-anchor="middle">Usuario</text></g>
+  <g id="bff" class="node"><rect x="360" y="100" width="160" height="60" rx="12" class="bff"/><text x="440" y="135" text-anchor="middle">BFF</text></g>
+  <g id="ai" class="node"><rect x="620" y="60" width="180" height="60" rx="12" class="svc"/><text x="710" y="95" text-anchor="middle">AI Agent</text></g>
+  <g id="reco" class="node"><rect x="620" y="160" width="180" height="60" rx="12" class="svc"/><text x="710" y="195" text-anchor="middle">Recomendador</text></g>
+  <line id="i1" x1="260" y1="130" x2="360" y2="130" class="edge"/>
+  <line id="i2" x1="520" y1="130" x2="620" y2="90" class="edge"/>
+  <line id="i3" x1="520" y1="130" x2="620" y2="190" class="edge"/>
+  <line id="i4" x1="800" y1="90" x2="520" y2="130" class="edge"/>
+  <line id="i5" x1="800" y1="190" x2="260" y2="130" class="edge"/>
+  <circle id="msg" cx="120" cy="130" r="8" class="particle token"/>
+</svg>
+<div class="anim-controls"><button class="btn" id="playI">▶</button><button class="btn" id="pauseI">⏸</button><button class="btn" id="resetI">⟲</button></div>
+</div>
+<script>
+(function(){
+ let i=0,t=null;const edges=['i1','i2','i3','i4','i5'];const steps=[{x:180,y:130},{x:440,y:130},{x:710,y:90},{x:440,y:130},{x:710,y:190},{x:180,y:130}];
+ function setEdges(){edges.forEach((e,idx)=>{document.getElementById(e).classList.toggle('active', idx < i);});}
+ function move(){const s=steps[Math.min(i,steps.length-1)];const p=document.getElementById('msg');p.setAttribute('cx',s.x);p.setAttribute('cy',s.y);}
+ function render(){setEdges();move();}
+ function play(){ if(t) return; t=setInterval(()=>{i++; if(i>steps.length){pause();return;} render();},900); }
+ function pause(){clearInterval(t);t=null;}
+ function reset(){pause();i=0;render();}
+ document.getElementById('playI').onclick=play;document.getElementById('pauseI').onclick=pause;document.getElementById('resetI').onclick=reset; reset();
+})();
+</script>
+</main><footer class="site-footer"><small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small></footer><script src="../js/main.js"></script>
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body></html>
