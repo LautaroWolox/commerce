@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Despliegue • E‑commerce</title>
+  <meta name="description" content="Documentación E2E de la arquitectura E-commerce." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>if (window.mermaid) { mermaid.initialize({ startOnLoad: true, theme: 'dark' }); }</script>
+</head>
+<body>
+
+  <header class="site-header" role="banner" aria-label="Cabecera">
+    <a class="brand" href="README.html" aria-label="Ir a inicio">E‑Commerce E2E</a>
+    
+    <nav class="main-nav" role="navigation" aria-label="Navegación principal">
+      <a href="README.html">Índice</a>
+      <a href="architecture.html">Arquitectura</a>
+      <a href="checkout.html">Checkout</a>
+      <a href="kafka.html">Kafka</a>
+      <a href="openai.html">OpenAI</a>
+      <a href="deploy.html">Despliegue</a>
+      <a href="observability.html">Observabilidad</a>
+      <a href="databases.html">Datos</a>
+      <a href="code.html">Código</a>
+      <a href="deployments.html">Dev→Prod</a>
+      <a href="docs.html">Docs Técnicos</a>
+      <a href="diagrams.html">Diagramas</a>
+      <a href="animations.html">Animaciones</a>
+    </nav>
+    <button id="themeToggle" class="btn" aria-pressed="false" aria-label="Cambiar tema">🌓</button>
+  </header>
+  <main id="content" tabindex="-1">
+
+<section class="content fade-in">
+  <h1>Despliegue: Blue/Green + Canary</h1>
+  <div class="m-actions">
+    <a class="btn" href="https://mermaid.live" target="_blank" rel="noreferrer noopener">Abrir en Mermaid Live ↗</a>
+  </div>
+  <div class="mermaid">
+flowchart LR
+  Client --> IstioGW["Istio Gateway"]
+  IstioGW -->|90%| V1["Blue Pods v1"]
+  IstioGW -->|10%| V2["Green Pods v2 (canary)"]
+</div>
+</section>
+
+  </main>
+<footer class="site-footer">
+  <small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small>
+</footer>
+  <script src="js/main.js"></script>
+  <script src="js/animations.js"></script>
+
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Datos • E‑commerce</title>
+  <meta name="description" content="Documentación E2E de la arquitectura E-commerce." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  
+</head>
+<body>
+
+  <header class="site-header" role="banner" aria-label="Cabecera">
+    <a class="brand" href="README.html" aria-label="Ir a inicio">E‑Commerce E2E</a>
+    
+    <nav class="main-nav" role="navigation" aria-label="Navegación principal">
+      <a href="README.html">Índice</a>
+      <a href="architecture.html">Arquitectura</a>
+      <a href="checkout.html">Checkout</a>
+      <a href="kafka.html">Kafka</a>
+      <a href="openai.html">OpenAI</a>
+      <a href="deploy.html">Despliegue</a>
+      <a href="observability.html">Observabilidad</a>
+      <a href="databases.html">Datos</a>
+      <a href="code.html">Código</a>
+      <a href="deployments.html">Dev→Prod</a>
+      <a href="docs.html">Docs Técnicos</a>
+      <a href="diagrams.html">Diagramas</a>
+      <a href="animations.html">Animaciones</a>
+    </nav>
+    <button id="themeToggle" class="btn" aria-pressed="false" aria-label="Cambiar tema">🌓</button>
+  </header>
+  <main id="content" tabindex="-1">
+
+<section class="content fade-in">
+  <h1>Datos: Por qué cada base</h1>
+  <ul>
+    <li><strong>Orders / Payments / Users → PostgreSQL</strong>: transacciones ACID, integridad referencial, auditoría.</li>
+    <li><strong>Catalog → MongoDB</strong>: esquema flexible para atributos variables y medios.</li>
+    <li><strong>Sessions / Cache → Redis</strong>: latencia sub‑ms con TTL y estructuras llave‑valor.</li>
+    <li><strong>ERP/Backoffice → Oracle</strong>: integración con legacy sin bloquear la evolución cloud‑native.</li>
+  </ul>
+</section>
+
+  </main>
+<footer class="site-footer">
+  <small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small>
+</footer>
+  <script src="js/main.js"></script>
+  <script src="js/animations.js"></script>
+
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body>
+</html>

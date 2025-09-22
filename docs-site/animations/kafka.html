@@ -1,0 +1,45 @@
+<!DOCTYPE html><html lang="es" data-theme="dark"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Animación</title><link rel="stylesheet" href="../css/styles.css"/><link rel="stylesheet" href="../css/animations.css"/>
+</head><body>
+<header class="site-header"><a class="brand" href="../README.html">E‑Commerce E2E</a>
+<nav class="main-nav"><a href="../animations.html">Volver</a></nav><button id="themeToggle" class="btn">🌓</button></header>
+<main id="content" class="content fade-in">
+<h1>Animación • Kafka</h1>
+<div class="anim-stage">
+<svg viewBox="0 0 1100 520" class="anim-svg" id="kafkaSvg">
+  <g id="orderSvc" class="node"><rect x="80" y="80" width="160" height="60" rx="12" class="svc"/><text x="160" y="115" text-anchor="middle">Order Svc</text></g>
+  <g id="topic" class="node"><rect x="360" y="80" width="200" height="60" rx="12" class="svc"/><text x="460" y="115" text-anchor="middle">Topic: orders.events</text></g>
+  <g id="paymentSvc" class="node"><rect x="700" y="80" width="160" height="60" rx="12" class="svc"/><text x="780" y="115" text-anchor="middle">Payment Svc</text></g>
+  <line id="k1" x1="240" y1="110" x2="360" y2="110" class="edge"/>
+  <line id="k2" x1="560" y1="110" x2="700" y2="110" class="edge"/>
+  <circle id="evt" cx="100" cy="110" r="8" class="particle"/>
+</svg>
+<div class="anim-controls"><button class="btn" id="playK">▶</button><button class="btn" id="pauseK">⏸</button><button class="btn" id="resetK">⟲</button></div>
+</div>
+<script>
+(function(){
+ let i=0,t=null;const edges=['k1','k2'];const steps=[{x:160,y:110},{x:460,y:110},{x:780,y:110}];
+ function setEdges(){edges.forEach((e,idx)=>{document.getElementById(e).classList.toggle('active', idx < i);});}
+ function move(){const s=steps[Math.min(i,steps.length-1)];const p=document.getElementById('evt');p.setAttribute('cx',s.x);p.setAttribute('cy',s.y);}
+ function render(){setEdges();move();}
+ function play(){ if(t) return; t=setInterval(()=>{i++; if(i>steps.length){pause();return;} render();},1000); }
+ function pause(){clearInterval(t);t=null;}
+ function reset(){pause();i=0;render();}
+ document.getElementById('playK').onclick=play;document.getElementById('pauseK').onclick=pause;document.getElementById('resetK').onclick=reset; reset();
+})();
+</script>
+</main><footer class="site-footer"><small>© 2025 Arquitectura E-commerce • Documentación estática Lautaro Buson</small></footer><script src="../js/main.js"></script>
+<script>
+(function(){
+  var nav=document.querySelector('.main-nav');
+  if(!nav) return;
+  if(nav.querySelector('a[href$="DOCUMENTACION.html"]')) return;
+  var a=document.createElement('a');
+  a.href=(location.pathname.includes('/docs-site/')?'../DOCUMENTACION.html':'./DOCUMENTACION.html');
+  a.textContent='Documentación';
+  nav.appendChild(a);
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             targetNamespace="https://acme.com/ecommerce/checkout">
+  <process id="checkout_process" name="Checkout" isExecutable="true">
+    <startEvent id="start" name="Start"/>
+    <sequenceFlow id="f1" sourceRef="start" targetRef="reserve_stock"/>
+    <serviceTask id="reserve_stock" name="Reserve Stock" camunda:class="com.acme.checkout.ReserveStockDelegate" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"/>
+    <sequenceFlow id="f2" sourceRef="reserve_stock" targetRef="authorize_payment"/>
+    <serviceTask id="authorize_payment" name="Authorize Payment" camunda:class="com.acme.checkout.AuthorizePaymentDelegate" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"/>
+    <sequenceFlow id="f3" sourceRef="authorize_payment" targetRef="gateway"/>
+    <exclusiveGateway id="gateway" name="Authorized?"/>
+    <sequenceFlow id="ok" sourceRef="gateway" targetRef="create_order">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${paymentApproved}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="ko" sourceRef="gateway" targetRef="release_stock">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!paymentApproved}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="create_order" name="Create Order" camunda:class="com.acme.checkout.CreateOrderDelegate" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"/>
+    <sequenceFlow id="f4" sourceRef="create_order" targetRef="end_ok"/>
+    <endEvent id="end_ok" name="OK"/>
+    <serviceTask id="release_stock" name="Release Stock (Compensation)" camunda:class="com.acme.checkout.ReleaseStockDelegate" xmlns:camunda="http://camunda.org/schema/1.0/bpmn"/>
+    <sequenceFlow id="f5" sourceRef="release_stock" targetRef="end_ko"/>
+    <endEvent id="end_ko" name="KO"/>
+  </process>
+</definitions>
