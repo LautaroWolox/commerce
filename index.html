@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E-Commerce E2E</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: linear-gradient(to bottom, #0f172a, #000);
+      color: #f1f5f9;
+      line-height: 1.6;
+    }
+    header {
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      position: sticky; top: 0; z-index: 50;
+    }
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+    }
+    nav a.brand {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #f9fafb;
+      text-decoration: none;
+    }
+    ul.menu {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+    ul.menu li a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    ul.menu li a:hover {
+      color: #f9fafb;
+    }
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+      text-align: center;
+    }
+    main h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+    main p.lead {
+      font-size: 1rem;
+      color: #cbd5e1;
+      margin-bottom: 2rem;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .5rem;
+      margin-bottom: 2rem;
+    }
+    .tags span {
+      background: #1e293b;
+      padding: .3rem .8rem;
+      border-radius: .8rem;
+      font-size: .85rem;
+      color: #e2e8f0;
+    }
+    section {
+      background: #1e293b;
+      border-radius: 0.8rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: left;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    }
+    section h2 {
+      font-size: 1.2rem;
+      margin-bottom: .8rem;
+      color: #f9fafb;
+    }
+    section ul {
+      margin-left: 1.2rem;
+    }
+    section ul li {
+      margin-bottom: .5rem;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: .8rem;
+      color: #94a3b8;
+      border-top: 1px solid #1e293b;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <nav>
+    <a href="#" class="brand">E-Commerce E2E</a>
+    <ul class="menu">
+      <li><a href="site/index.html">Índice</a></li>
+      <li><a href="e-commerce/architecture.html">Arquitectura</a></li>
+      <li><a href="e-commerce/checkout.html">Checkout</a></li>
+      <li><a href="e-commerce/kafka.html">Kafka</a></li>
+      <li><a href="e-commerce/openai.html">OpenAI</a></li>
+      <li><a href="e-commerce/deploy.html">Despliegue</a></li>
+      <li><a href="e-commerce/observability.html">Observabilidad</a></li>
+      <li><a href="e-commerce/databases.html">Datos</a></li>
+      <li><a href="e-commerce/code.html">Código</a></li>
+      <li><a href="docs-site/index.html">Doc Técnicos</a></li>
+      <li><a href="e-commerce/diagrams.html">Diagramas</a></li>
+      <li><a href="e-commerce/animations.html">Animaciones</a></li>
+      <li><a href="e-commerce/docs.html">Documentación</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <h1>Plataforma enterprise cloud · on-prem resiliente, escalable, segura con IA aplicada al negocio.</h1>
+  <p class="lead">Esta plataforma de e-commerce enterprise combina cloud-native (GCP/GKE/Istio) con on-prem (OCP4/Oracle) para obtener resiliencia, escalabilidad y continuidad sin fricción con el legado.</p>
+  <div class="tags">
+    <span>Arquitectura</span>
+    <span>Checkout</span>
+    <span>Kafka</span>
+    <span>OpenAI</span>
+    <span>Blue/Green + Canary</span>
+    <span>Observabilidad</span>
+    <span>Datos</span>
+    <span>Animación E2E</span>
+  </div>
+
+  <section>
+    <h2>Frontend</h2>
+    <ul>
+      <li><b>Angular (Web):</b> SPA con routing, lazy loading e interceptor JWT. Catálogo y búsqueda como observables (RxJS) para UX fluida.</li>
+      <li><b>Flutter (Mobile):</b> App híbrida con interceptor para Bearer token. Lógica semántica de endpoints, smoke tests de compra/checkout.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Backoffice y Datos</h2>
+    <ul>
+      <li><b>Oracle:</b> integra procesos financieros/logísticos. ERP en bounded contexts.</li>
+      <li><b>PostgreSQL:</b> operaciones transaccionales (órdenes, usuarios, pagos) con consistencia ACID.</li>
+      <li><b>MongoDB:</b> catálogo flexible, variantes, escalabilidad horizontal.</li>
+      <li><b>Redis:</b> caché de lecturas y sesiones para baja latencia.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Integración y Procesos</h2>
+    <ul>
+      <li><b>Kafka:</b> backbone de eventos versionados con Schema Registry.</li>
+      <li><b>Camunda BPMN:</b> checkout orquesta reserveStock → authorizePayment → createOrder.</li>
+      <li><b>OAuth2/OIDC:</b> autenticación estándar, API-Gateway válida JWT y propaga identidades.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Observabilidad y SLOs</h2>
+    <ul>
+      <li><b>OpenTelemetry + Dynatrace:</b> métricas y logs con SLOs de negocio (p95/p99).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Entrega Continua</h2>
+    <ul>
+      <li><b>Tekton + quality gates:</b> despliegues Canary/Blue-Green controlados por métricas.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  © 2025 Arquitectura E-commerce · Documentación estática Lautaro Buson
+</footer>
+</body>
+</html>
